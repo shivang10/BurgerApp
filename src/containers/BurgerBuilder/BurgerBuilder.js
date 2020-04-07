@@ -4,6 +4,13 @@ import Auxiliary from '../../hoc/Auxiliary';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 
+const INGREDIENT_PRICES = {
+    salad: 70,
+    paneer: 120,
+    cheese: 100,
+    spices: 50
+};
+
 class BurgerBuilder extends Component{
 
     state = {
@@ -12,14 +19,62 @@ class BurgerBuilder extends Component{
             spices: 0,
             cheese: 0,
             paneer: 0
+        },
+        totalPrice: 4
+    }
+
+    addIngredient = (type) => {
+        const oldCount = this.state.ingredients[type];
+        const updateCounted = oldCount + 1;
+        const updatedIngredients = {
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updateCounted;
+
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+        this.setState({totalPrice: newPrice,
+        ingredients: updatedIngredients});
+
+    }
+
+    removeIngredient = (type) => {
+        const oldCount = this.state.ingredients[type];
+        if(oldCount<=0)
+        {
+            return;
         }
+        const updateCounted = oldCount - 1;
+        const updatedIngredients = {
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updateCounted;
+
+        const priceDeduction = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - priceDeduction;
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
     }
 
     render(){
+        const disabledInfo = {
+            ...this.state.ingredients
+        };
+        for(let key in disabledInfo){
+            disabledInfo[key] = disabledInfo[key] <=0;
+        }
         return (
             <Auxiliary>
                 <Burger ingredients={this.state.ingredients} />
-                <BuildControls />
+                <BuildControls 
+                ingredientAdded = {this.addIngredient}
+                ingredientRemoved = {this.removeIngredient}
+                disabled={disabledInfo}
+                />
             </Auxiliary>
         );
     }
